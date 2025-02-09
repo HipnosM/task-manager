@@ -1,0 +1,17 @@
+.home_container {
+    width: 80%;
+    height: calc(100vh - 12rem);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-around;
+    margin: 0 auto;
+}
+
+.title {
+    text-align: center;
+    font-size: 2.8rem;
+    & span {
+        color: #4BBF1E;
+    }
+}
