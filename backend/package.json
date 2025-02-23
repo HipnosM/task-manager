@@ -11,11 +11,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@prisma/client": "^6.4.1",
     "@supabase/supabase-js": "^2.45.4",
     "@types/node": "^18.0.6",
     "bcryptjs": "^2.4.3",
     "dotenv": "^16.4.5",
     "express": "^4.21.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "postgres": "^3.4.5"
+  },
+  "devDependencies": {
+    "prisma": "^6.4.1"
   }
 }

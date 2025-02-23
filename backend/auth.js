@@ -1,71 +1,67 @@
 import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { supabase } from "./supabase.js";
+import { PrismaClient } from "@prisma/client";
 
-const router = express.Router();
-const SECRET_KEY = "JUST_A_TEST";
+const router = express();
+const prisma = new PrismaClient();
 
-// gerar token
-const generateToken = (userId, userName, userEmail) => {
-  return jwt.sign({ userId, userName, userEmail }, SECRET_KEY, { expiresIn: "1h" });
-};
+const userExists = async (userName, userEmail) => await prisma.user.findFirst({
+  where: {
+    OR: [
+      { name: userName },
+      { email: userEmail }
+    ]
+  }
+});
 
 // registrar novo usuário
 router.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
   console.log(req.body);
-  if (!name || !email || !password) return res.status(400).json({ error: "Todos os campos são obrigatórios." });
 
-  // verificar se o usuário já existe
-  const { data: userExists } = await supabase
-    .from("users")
-    .select("*")
-    .or(`name.eq.${name}, email.eq.${email}`)
-    .single();
-  if (userExists) return res.status(400).json({ error: "Usuário já cadastrado, faça login." });
+  if (!name || !email || !password) return res.status(400).json({ error: "Insira corretamente todos os campos." });
 
-  // encriptar a senha
+  const user = await userExists(name, email);
+  if (user) return res.status(400).json({ error: "Usuário já existe, faça login!" });
+
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  // criar novo usuário
-  const { data, error } = await supabase
-    .from("users")
-    .insert([{ name, email, password: hashedPassword }]);
-  if (error) return res.status(400).json({ error: "Erro ao cadastrar usuário." });
+  try {
+    const newUser = await prisma.user.create({
+      data: {
+        name: name,
+        email: email,
+        password: hashedPassword
+      }
+    });
 
-  res.status(201).json({ message: "Usuário cadastrado com sucesso." });
+    res.status(201).json({ message: "Usuário cadastrado com sucesso!" });
+  } catch (error) {
+    console.error("erro ao criar um usuário", error);
+    res.status(500).json({ error: "Ocorreu um erro ao registrar o usuário!" })
+  };
 });
 
-// fazer login
+// Fazer login
 router.post("/login", async (req, res) => {
   const { name, email, password } = req.body;
 
-  const { data: user, error } = await supabase
-    .from("users")
-    .select("*")
-    .or(`name.eq.${name}, email.eq.${email}`)
-    .single();
-  if (error || !user) return res.status(400).json({ error: "Usuário não encontrado." });
-  // verificar se a senha está correta
-  const validPassword = await bcrypt.compare(password, user.password);
-  if (!validPassword) return res.status(400).json({ error: "Senha incorreta." });
+  if ((!name && !email) || !password) return res.status(400).json({ error: "Insira corretamente todos os campos." });
 
-  // criar token com id, username e email
-  const token = generateToken(user.id, user.username, user.email);
-  res.json({ message: "Login realizado com sucesso.", token });
-});
 
-// verificar o token
-const authenticateToken = (req, res, next) => {
-  const token = req.headers["authorization"];
-  if (!token) return res.status(401).json({ error: "Token não encontrado." });
+  try {
+    const user = await userExists(name, email);
+    if (!user) return res.status(404).json({ error: "Usuário não encontrado." });
 
-  jwt.verify(token.split(" ")[1], SECRET_KEY, (err, user) => {
-    if (err) return res.status(401).json({ error: "Token inválido." });
-    req.user = user;
-    next();
-  });
-};
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) return res.status(401).json({ error: "Senha inválida, tente novamente." });
 
-export { router as authRoutes, authenticateToken };
+    res.status(200).json({message: "Logado com sucesso!"});
+  } catch (error) {
+    console.error("Erro ao fazer login", error);
+    res.status(500).json({error: "Erro ao fazer login."});
+  };
+})
+
+export { router as authRoutes };

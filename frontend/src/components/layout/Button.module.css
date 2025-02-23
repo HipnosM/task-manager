@@ -4,6 +4,9 @@
     padding: 1rem;
     border-radius: .4rem;
     color: #FFF;
+    cursor: pointer;
+    outline: none;
+    border: none;
 
     display: flex;
     align-items: center;
