@@ -79,12 +79,14 @@ export default function Login() {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
-                    email: loginData.userOrEmail,
+                    userOrEmail: loginData.userOrEmail,
                     password: loginData.userPass
                 })
             });
-
+            
             const data = await response.json();
+            console.log(data);
+            console.log(loginData);
             if (!response.ok) throw new Error(data.error || "Erro ao fazer login.");
 
             localStorage.setItem("token", data.token); // ✅ Salva o token JWT no localStorage

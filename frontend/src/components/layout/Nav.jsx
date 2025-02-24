@@ -19,7 +19,7 @@ export default function Nav() {
             <ul className={styles.list}>
                 <li className={styles.item}>
                     <Link
-                        to={"/"}
+                        to={"/home"}
                         onClick={() => toggleLinkStats("/")}
                         className={linkActive === "/" ? styles.active : ""} >
                         <FaHome />

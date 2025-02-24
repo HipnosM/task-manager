@@ -16,8 +16,8 @@ function App() {
       <Container customClass="min_heiht">
 
         <Routes>
-          <Route exact path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
+          <Route default path="/" element={<Login />} />
+          <Route exact path="/home" element={<Home />} />
           <Route path="/tasks" element={<Tasks />} />
           <Route path="/my-account" element={<Account />} />
         </Routes>
