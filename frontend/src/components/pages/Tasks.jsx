@@ -9,7 +9,8 @@ export default function Tasks() {
             const token = localStorage.getItem("token"); // Pegamos o token JWT armazenado
 
             if (!token) {
-                console.error("Usuário não autenticado. Faça login novamente.");
+                console.error("Usuário não autenticado. Faça login.");
+                setLoading(!loading);
                 return;
             }
 
@@ -42,7 +43,11 @@ export default function Tasks() {
         <section>
             <h1>Tarefas</h1>
             {loading && <p>Carregando...</p>}
-            {!loading && tasks.length === 0 && <p>Nenhuma tarefa encontrada.</p>}
+            {!loading && tasks.length === 0 &&
+                <div>
+                    <p>Nenhuma tarefa encontrada.</p>
+                    <p>Faça <a href="/">login</a> para ver suas tarefas.</p>
+                </div>}
             {!loading && tasks.length > 0 && (
                 tasks.map((task) => (
                     <div key={task.id}>
