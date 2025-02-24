@@ -1,15 +1,21 @@
 import prisma from "../config/prismaCLI.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 // Verificar se o usuário existe
-const userExists = async (userName, userEmail) => await prisma.user.findFirst({
+const userExists = async (data) => await prisma.user.findFirst({
     where: {
         OR: [
-            { name: userName },
-            { email: userEmail }
+            { name: data },
+            { email: data }
         ]
     }
 });
+
+// Gerar token
+const generateToken = (userId, userName, userEmail) => {
+    return jwt.sign({ userId, userName, userEmail }, process.env.SECRET_KEY, { expiresIn: "1h" });
+};
 
 // Registrar usuário
 const userRegister = async (req, res) => {
@@ -40,19 +46,20 @@ const userRegister = async (req, res) => {
 
 // Logar usuário
 const userLogin = async (req, res) => {
-    const { name, email, password } = req.body;
+    const { userOrEmail, password } = req.body;
 
-    if ((!name && !email) || !password) return res.status(400).json({ error: "Insira corretamente todos os campos." });
+    if (!userOrEmail || !password) return res.status(400).json({ error: "Insira corretamente todos os campos." });
 
 
     try {
-        const user = await userExists(name, email);
+        const user = await userExists(userOrEmail);
         if (!user) return res.status(404).json({ error: "Usuário não encontrado." });
 
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) return res.status(401).json({ error: "Senha inválida, tente novamente." });
 
-        res.status(200).json({ message: "Logado com sucesso!" });
+        const token = generateToken(user.id, user.name, user.email);
+        res.status(200).json({ message: "Logado com sucesso!", token: token });
     } catch (error) {
         console.error("Erro ao fazer login", error);
         res.status(500).json({ error: "Erro ao fazer login." });
