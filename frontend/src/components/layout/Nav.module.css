@@ -1,10 +1,15 @@
-.navbar {
+header {
     background-color: #525252;
+}
+
+.navbar {
     width: 100%;
+    max-width: 1300px;
     min-height: 6rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin: 0 auto;
     padding: .4rem 1.2rem;
 }
 

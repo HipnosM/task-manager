@@ -12,39 +12,41 @@ export default function Nav() {
     };
 
     return (
-        <nav className={styles.navbar}>
-            <div className={styles.logo}>
-                <Link to={"/"}>Logo</Link>
-            </div>
-            <ul className={styles.list}>
-                <li className={styles.item}>
-                    <Link
-                        to={"/home"}
-                        onClick={() => toggleLinkStats("/")}
-                        className={linkActive === "/" ? styles.active : ""} >
-                        <FaHome />
-                        Início
-                    </Link>
-                </li>
-                <li className={styles.item}>
-                    <Link
-                        to={"/tasks"}
-                        onClick={() => toggleLinkStats("/tasks")}
-                        className={linkActive === "/tasks" ? styles.active : ""}>
-                        <FaTasks />
-                        Tarefas
-                    </Link>
-                </li>
-                <li className={styles.item}>
-                    <Link
-                        to={"/my-account"}
-                        onClick={() => toggleLinkStats("/my-account")}
-                        className={linkActive === "/my-account" ? styles.active : ""}>
-                        <FaUser />
-                        Conta
-                    </Link>
-                </li>
-            </ul>
-        </nav>
+        <header>
+            <nav className={styles.navbar}>
+                <div className={styles.logo}>
+                    <Link to={"/home"}>Logo</Link>
+                </div>
+                <ul className={styles.list}>
+                    <li className={styles.item}>
+                        <Link
+                            to={"/home"}
+                            onClick={() => toggleLinkStats("/")}
+                            className={linkActive === "/" ? styles.active : ""} >
+                            <FaHome />
+                            Início
+                        </Link>
+                    </li>
+                    <li className={styles.item}>
+                        <Link
+                            to={"/tasks"}
+                            onClick={() => toggleLinkStats("/tasks")}
+                            className={linkActive === "/tasks" ? styles.active : ""}>
+                            <FaTasks />
+                            Tarefas
+                        </Link>
+                    </li>
+                    <li className={styles.item}>
+                        <Link
+                            to={"/my-account"}
+                            onClick={() => toggleLinkStats("/my-account")}
+                            className={linkActive === "/my-account" ? styles.active : ""}>
+                            <FaUser />
+                            Conta
+                        </Link>
+                    </li>
+                </ul>
+            </nav>
+        </header>
     );
 };

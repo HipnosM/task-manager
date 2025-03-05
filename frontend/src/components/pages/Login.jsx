@@ -92,7 +92,7 @@ export default function Login() {
             localStorage.setItem("token", data.token); // ✅ Salva o token JWT no localStorage
             console.log("Usuário autenticado com sucesso!");
 
-            navigate("/tasks"); // ✅ Redireciona para a página de tarefas após login
+            navigate("/home"); // ✅ Redireciona para a página de tarefas após login
         } catch (err) {
             setError(err.message);
         }
