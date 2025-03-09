@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import styles from "./Tasks.module.css";
 import Button from "../layout/Button";
 import { FaEdit, FaTrash } from "react-icons/fa";
+import { FiLoader } from "react-icons/fi";
 
 export default function Tasks() {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
+    const url = import.meta.env.VITE_API_URL;
 
     useEffect(() => {
         const fetchTasks = async () => {
@@ -18,7 +20,7 @@ export default function Tasks() {
             }
 
             try {
-                const response = await fetch("http://localhost:3000/tasks", {
+                const response = await fetch(`${url}/tasks`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -39,14 +41,16 @@ export default function Tasks() {
             }
         };
 
-        fetchTasks();
+        setTimeout(() => {
+            fetchTasks();
+        }, 300);
     }, []);
 
     const handleDelete = async (taskId) => {
         try {
             const token = localStorage.getItem("token");
             setLoading(true);
-            const response = await fetch(`http://localhost:3000/tasks/${taskId}`, {
+            const response = await fetch(`${url}/tasks/${taskId}`, {
                 method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
@@ -59,7 +63,6 @@ export default function Tasks() {
             const updatedTasks = tasks.filter((task) => task.id !== taskId);
             setTasks(updatedTasks);
             setLoading(false);
-            alert("Tarefa excluída com sucesso!");
         } catch (error) {
             console.error(error);
         }
@@ -68,7 +71,7 @@ export default function Tasks() {
     return (
         <section id={styles.tasks_container}>
             <h2>Tarefas</h2>
-            {loading && <p id={styles.loading}>Carregando...</p>}
+            {loading && <div id={styles.loading}><FiLoader /></div>}
             {!loading && tasks.length === 0 &&
                 <div id={styles.no_tasks}>
                     <p>Nenhuma tarefa encontrada.</p>

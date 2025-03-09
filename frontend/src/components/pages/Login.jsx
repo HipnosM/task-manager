@@ -37,6 +37,8 @@ export default function Login() {
         }
     };
 
+    const url = import.meta.env.VITE_API_URL;
+    console.log(url);
     // ✅ Função de Registro de Usuário
     const handleRegister = async (event) => {
         event.preventDefault();
@@ -47,7 +49,7 @@ export default function Login() {
         }
 
         try {
-            const response = await fetch("http://localhost:3000/auth/register", {
+            const response = await fetch(`${url}/auth/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -75,7 +77,7 @@ export default function Login() {
         event.preventDefault();
 
         try {
-            const response = await fetch("http://localhost:3000/auth/login", {
+            const response = await fetch(`${url}/auth/login`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
