@@ -75,7 +75,7 @@ export default function Tasks() {
             {!loading && tasks.length === 0 &&
                 <div id={styles.no_tasks}>
                     <p>Nenhuma tarefa encontrada.</p>
-                    <p>Faça <a href="/">login</a> para ver suas tarefas.</p>
+                    {!localStorage.getItem("token") && <p>Faça <a href="/">login</a> para ver suas tarefas.</p>}
                 </div>}
             {!loading && tasks.length > 0 && (
                 <div id={styles.tasks}>
