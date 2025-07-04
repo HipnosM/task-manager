@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom"; // Redirecionamento após login
 import styles from "./Login.module.css";
 import Button from "../layout/Button";
+import {FaSignInAlt, FaUserCheck } from "react-icons/fa";
 
 import Hero from "../../assets/hero_login.png";
 
@@ -118,7 +119,7 @@ export default function Login() {
                             <input type="password" id="userRepass" placeholder="Confirme sua senha" value={userData.userRepass} onChange={(e) => handleInputChange(e, true)} required />
                         </div>
                         <div className={styles.submit__button}>
-                            <Button text="Registrar" customClass="green" type="submit" />
+                            <Button text="Registrar" customClass="green" type="submit" icon={<FaUserCheck />} />
                             {/* <button type="submit">Registrar</button> */}
                         </div>
                         <p onClick={changeForm}>Entrar com uma conta existente!</p>
@@ -134,7 +135,7 @@ export default function Login() {
                             <input type="password" id="userPass" placeholder="Senha" value={loginData.userPass} onChange={(e) => handleInputChange(e, false)} required />
                         </div>
                         <div className={styles.submit__button}>
-                            <Button text="Entrar" customClass="green" type="submit" />
+                            <Button text="Entrar" customClass="green" type="submit" icon={<FaSignInAlt />} />
                             {/* <button type="submit">Registrar</button> */}
                         </div>
                         <p onClick={changeForm}>Entrar com uma nova conta!</p>
