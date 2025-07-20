@@ -8,8 +8,8 @@ export default function Button({ customClass, text, icon, type = "", onClick }) 
             <button
                 type={type}
                 className={classNames}
-                style={{ gap: icon ? "1rem" : "0"}}
-                onClick={type === "button" ? onClick : () => { }}
+                style={{ gap: icon ? "0.625rem" : "0"}}
+                onClick={type === "submit" ? undefined : onClick}
             >
                 {text}
                 <span className={styles.icon}>{icon}</span>
