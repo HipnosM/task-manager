@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import prisma from "./config/prismaCLI.js";
 
 import dotenv from "dotenv";
 dotenv.config();
@@ -20,3 +21,10 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Servidor rodando na porta ${port}`);
 });
+
+// manter database ativa a cada 5 dias
+setInterval(async () => {
+    console.log("Mantendo o banco de dados ativo...");
+    const users = await prisma.user.findMany();
+    console.log(`Usuários ativos: ${users.length}`);
+}, 432000000); // 5 dias em milissegundos
