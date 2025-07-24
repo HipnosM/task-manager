@@ -21,15 +21,17 @@ export const getTasks = async (req, res) => {
 // Criar tarefa
 export const createTask = async (req, res) => {
     const user = req.user;
-    const { title, description } = req.body;
+    const { title, description, priority } = req.body;
 
-    if (!title || !description) return res.status(400).json({ error: "Todos os campos são obrigatórios." });
+    if (!title || !description || !priority) return res.status(400).json({ error: "Todos os campos são obrigatórios." });
 
     try {
         const newTask = await prisma.task.create({
             data: {
                 taskname: title,
                 taskdescription: description,
+                taskpriority: priority,
+                taskstatus: false,
                 userid: user.userId
             }
         });
@@ -37,13 +39,14 @@ export const createTask = async (req, res) => {
         res.status(201).json({message: "Tarefa criada com sucesso!", task: newTask});
     } catch (error) {
         res.status(400).json({ error: "Erro ao criar tarefa." });
+        console.error("Erro ao criar tarefa:", error);
     };
 };
 
 export const updateTask = async (req, res) => {
     const user = req.user;
     const {id} = req.params;
-    const {title, description, status} = req.body;
+    const {title, description, priority, status} = req.body;
 
     const task = await prisma.task.findFirst({
         where: {
@@ -63,6 +66,7 @@ export const updateTask = async (req, res) => {
             data: {
                 taskname: title ? title : task.taskname,
                 taskdescription: description ? description : task.taskdescription,
+                taskpriority: priority ? priority : task.taskpriority,
                 taskstatus: status ? status === "true" : task.taskstatus
             }
         });
