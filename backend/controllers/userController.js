@@ -3,14 +3,21 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 // Verificar se o usuário existe
-const userExists = async (data) => await prisma.user.findFirst({
-    where: {
-        OR: [
-            { name: data },
-            { email: data }
-        ]
+const userExists = async (data) => {
+    try {
+        return await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { name: { equals: data, mode: "insensitive" } },
+                    { email: { equals: data, mode: "insensitive" } }
+                ]
+            }
+        });
+    } catch (error) {
+        console.error("Erro ao verificar o usuário!", error);
+        throw error;
     }
-});
+};
 
 // Gerar token
 const generateToken = (userId, userName, userEmail) => {
@@ -23,7 +30,7 @@ const userRegister = async (req, res) => {
 
     if (!name || !email || !password) return res.status(400).json({ error: "Insira corretamente todos os campos." });
 
-    const user = await userExists(name, email);
+    const user = await userExists(name) || await userExists(email);
     if (user) return res.status(400).json({ error: "Usuário já existe, faça login!" });
 
     const hashedPassword = await bcrypt.hash(password, 10);
