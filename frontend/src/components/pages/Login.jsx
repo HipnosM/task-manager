@@ -1,10 +1,12 @@
-import { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Redirecionamento após login
+import { useEffect, useState } from "react";
+import { replace, useNavigate } from "react-router-dom"; // Redirecionamento após login
 import styles from "./Login.module.css";
 import Button from "../layout/Button";
-import {FaSignInAlt, FaUserCheck } from "react-icons/fa";
+import { FaSignInAlt, FaUserCheck } from "react-icons/fa";
 
 import Hero from "../../assets/hero_login.png";
+import api from "../../api/api";
+import toast from "react-hot-toast";
 
 export default function Login() {
     const [formRegister, setFormRegister] = useState(true);
@@ -14,19 +16,24 @@ export default function Login() {
         userPass: "",
         userRepass: ""
     });
-
     const [loginData, setLoginData] = useState({
         userOrEmail: "",
         userPass: ""
     });
-
-    const [error, setError] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const navigate = useNavigate(); // Hook para redirecionar após login
 
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            navigate("/home", { replace: true });
+        }
+        setIsSubmitting(false);
+    }, [navigate, formRegister]);
+
     const changeForm = () => {
         setFormRegister(!formRegister);
-        setError("");
     };
 
     const handleInputChange = (event, isRegister) => {
@@ -39,73 +46,54 @@ export default function Login() {
     };
 
     const url = import.meta.env.VITE_API_URL;
-    console.log(url);
     // ✅ Função de Registro de Usuário
     const handleRegister = async (event) => {
         event.preventDefault();
 
         if (userData.userPass !== userData.userRepass) {
-            setError("As senhas não coincidem.");
+            toast.error("As senhas não coincidem!", { icon: "❌" });
             return;
         }
 
-        try {
-            const response = await fetch(`${url}/auth/register`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    name: userData.userName,
-                    email: userData.userEmail,
-                    password: userData.userPass
-                })
+        setIsSubmitting(true);
+        
+        api.register({
+            name: userData.userName,
+            email: userData.userEmail,
+            password: userData.userPass
+        })
+            .then(() => {
+                toast.success("Usuário registrado com sucesso!", { icon: "✅" });
+                setFormRegister(false);
+            })
+            .catch((error) => {
+                toast.error(error.message, { icon: "❌" });
+                setIsSubmitting(false);
             });
-
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || "Erro ao registrar usuário.");
-            }
-
-            alert("Usuário registrado com sucesso! Agora faça login.");
-            setFormRegister(false); // Alterna para a tela de login
-        } catch (err) {
-            setError(err.message);
-        }
     };
 
     // ✅ Função de Login do Usuário
     const handleLogin = async (event) => {
         event.preventDefault();
+        setIsSubmitting(true);
 
-        try {
-            const response = await fetch(`${url}/auth/login`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    userOrEmail: loginData.userOrEmail,
-                    password: loginData.userPass
-                })
+        await api.login({
+            userOrEmail: loginData.userOrEmail,
+            password: loginData.userPass
+        })
+            .then(() => {
+                toast.success("Login realizado com sucesso!", { icon: "✅" });
+                setTimeout(() => navigate("/home", { replace: true }), 2500);
+            })
+            .catch((error) => {
+                toast.error(error.message, { icon: "❌" });
+                setIsSubmitting(false);
             });
-            
-            const data = await response.json();
-            console.log(data);
-            console.log(loginData);
-            if (!response.ok) throw new Error(data.error || "Erro ao fazer login.");
-
-            localStorage.setItem("token", data.token); // ✅ Salva o token JWT no localStorage
-            console.log("Usuário autenticado com sucesso!");
-
-            navigate("/home"); // ✅ Redireciona para a página de tarefas após login
-        } catch (err) {
-            setError(err.message);
-        }
     };
 
     return (
         <section className={styles.container}>
             <h1 className={styles.title}>Bem-vindo(a) ao <span>Task Manager</span>!</h1>
-
-            {error && <p className={styles.error}>{error}</p>}
 
             {formRegister ? (
                 <div className={styles.form__container}>
@@ -119,7 +107,10 @@ export default function Login() {
                             <input type="password" id="userRepass" placeholder="Confirme sua senha" value={userData.userRepass} onChange={(e) => handleInputChange(e, true)} required />
                         </div>
                         <div className={styles.submit__button}>
-                            <Button text="Registrar" customClass="green" type="submit" icon={<FaUserCheck />} />
+                            <Button text={isSubmitting ? "Registrando..." : "Registrar"}
+                                customClass="green" type="submit" icon={<FaUserCheck />}
+                                disabled={isSubmitting}
+                            />
                             {/* <button type="submit">Registrar</button> */}
                         </div>
                         <p onClick={changeForm}>Entrar com uma conta existente!</p>
@@ -128,14 +119,17 @@ export default function Login() {
             ) : (
                 <div className={styles.form__container}>
                     <img src={Hero} alt="" />
-                    <form onSubmit={handleLogin} id={styles.login}>
+                    <form onSubmit={handleLogin} id={styles.login} disabled={isSubmitting}>
                         <h2>Login</h2>
                         <div className={styles.input__group}>
                             <input type="text" id="userOrEmail" placeholder="Usuário ou e-mail" value={loginData.userOrEmail} onChange={(e) => handleInputChange(e, false)} required />
                             <input type="password" id="userPass" placeholder="Senha" value={loginData.userPass} onChange={(e) => handleInputChange(e, false)} required />
                         </div>
                         <div className={styles.submit__button}>
-                            <Button text="Entrar" customClass="green" type="submit" icon={<FaSignInAlt />} />
+                            <Button text={isSubmitting ? "Entrando..." : "Entrar"}
+                                customClass="green" type="submit" icon={<FaSignInAlt />}
+                                disabled={isSubmitting}
+                            />
                             {/* <button type="submit">Registrar</button> */}
                         </div>
                         <p onClick={changeForm}>Entrar com uma nova conta!</p>
