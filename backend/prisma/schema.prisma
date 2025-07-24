@@ -20,7 +20,16 @@ model Task {
   id              Int     @id @default(autoincrement())
   taskname        String
   taskdescription String
+  taskpriority        Priority @default(MEDIUM)
   taskstatus      Boolean @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
   userid          Int
   user            User    @relation(fields: [userid], references: [id], onDelete: Cascade)
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
 }
