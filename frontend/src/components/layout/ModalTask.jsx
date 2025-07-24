@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import Button from './Button';
+import Toast from 'react-hot-toast';
+import api from '../../api/api';
 
 export default function ModalTask({ modalOpen = false, onClose, mode = "create", task = null }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,13 +21,25 @@ export default function ModalTask({ modalOpen = false, onClose, mode = "create",
         e.stopPropagation();
         setIsSubmitting(true);
 
-        let dateTime = new Date().toLocaleString("sv-SE");
-        let newFormData = {
-            ...formData,
-            date: dateTime,
-        };
+        const { title, description, priority } = formData;
+        if (!title || !description || !priority) {
+            Toast.error("Preencha todos os campos obrigatórios!");
+            setIsSubmitting(false);
+            return;
+        }
 
-        console.log(newFormData);
+        const taskData = { title, description, priority };
+
+        if (mode === "create") {
+            api.createTask(taskData)
+                .then(() => {
+                    Toast.success("Tarefa criada com sucesso!", { icon: "✅" });
+                })
+                .catch((error) => {
+                    Toast.error(error.message, { icon: "❌" });
+                });
+        }
+
         setIsSubmitting(false);
         onClose();
     }
@@ -71,6 +85,21 @@ export default function ModalTask({ modalOpen = false, onClose, mode = "create",
                         />
                     </Form.Group>
 
+                    <Form.Group className="mb-3">
+                        <Form.Label style={style.label}>Prioridade</Form.Label>
+                        <Form.Select
+                            id="priority" style={style.input}
+                            required value={formData.priority}
+                            onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                            disabled={isSubmitting}
+                        >
+                            <option value="" disabled>Selecione</option>
+                            <option value="LOW">Baixa</option>
+                            <option value="MEDIUM">Média</option>
+                            <option value="HIGH">Alta</option>
+                        </Form.Select>
+                    </Form.Group>
+
                     <Form.Group className="d-flex justify-content-end gap-3">
                         <Button
                             text="Cancelar" onClick={onClose}
@@ -107,13 +136,12 @@ function getInitialState(mode, task) {
         title: task.title || "",
         description: task.description || "",
         date: task.date || "",
-        priority: task.priority || "baixa",
-        status: task.status || "a fazer",
+        priority: task.priority || "",
+        status: task.status || "todo",
     } : {
         title: "",
         description: "",
-        date: "",
-        priority: "low",
+        priority: "",
         status: "todo",
     };
 };
