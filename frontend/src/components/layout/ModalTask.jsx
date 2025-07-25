@@ -5,7 +5,7 @@ import Button from './Button';
 import Toast from 'react-hot-toast';
 import api from '../../api/api';
 
-export default function ModalTask({ modalOpen = false, onClose, mode = "create", task = null }) {
+export default function ModalTask({ modalOpen = false, onClose, mode = "create", task = null, fetchTasks }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState(getInitialState(mode, task));
 
@@ -40,6 +40,17 @@ export default function ModalTask({ modalOpen = false, onClose, mode = "create",
                 });
         }
 
+        if (mode === "edit" && task) {
+            api.updateTask(task.id, taskData)
+                .then(() => {
+                    Toast.success("Tarefa atualizada com sucesso!", { icon: "✅" });
+                    fetchTasks();
+                })
+                .catch((error) => {
+                    Toast.error(error.message, { icon: "❌" });
+                });
+        }
+
         setIsSubmitting(false);
         onClose();
     }
@@ -63,15 +74,32 @@ export default function ModalTask({ modalOpen = false, onClose, mode = "create",
 
             <Modal.Body className="bootstrap-font">
                 <Form className="bootstrap-font" onSubmit={handleSubmit}>
-                    <Form.Group className="mb-3">
-                        <Form.Label style={style.label}>Título</Form.Label>
-                        <Form.Control
-                            type="text" placeholder="Título"
-                            id="taskname" style={style.input}
-                            required value={formData.title}
-                            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                            disabled={isSubmitting}
-                        />
+                    <Form.Group className="d-flex gap-3">
+                        <Form.Group className="mb-3 w-100">
+                            <Form.Label style={style.label}>Título</Form.Label>
+                            <Form.Control
+                                type="text" placeholder="Título"
+                                id="taskname" style={style.input}
+                                required value={formData.title}
+                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                disabled={isSubmitting}
+                            />
+                        </Form.Group>
+
+                        <Form.Group className="mb-3 w-100">
+                            <Form.Label style={style.label}>Prioridade</Form.Label>
+                            <Form.Select
+                                id="priority" style={style.input}
+                                required value={formData.priority}
+                                onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                                disabled={isSubmitting}
+                            >
+                                <option value="" disabled>Selecione</option>
+                                <option value="LOW">Baixa</option>
+                                <option value="MEDIUM">Média</option>
+                                <option value="HIGH">Alta</option>
+                            </Form.Select>
+                        </Form.Group>
                     </Form.Group>
 
                     <Form.Group className="mb-3">
@@ -83,21 +111,6 @@ export default function ModalTask({ modalOpen = false, onClose, mode = "create",
                             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                             disabled={isSubmitting}
                         />
-                    </Form.Group>
-
-                    <Form.Group className="mb-3">
-                        <Form.Label style={style.label}>Prioridade</Form.Label>
-                        <Form.Select
-                            id="priority" style={style.input}
-                            required value={formData.priority}
-                            onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                            disabled={isSubmitting}
-                        >
-                            <option value="" disabled>Selecione</option>
-                            <option value="LOW">Baixa</option>
-                            <option value="MEDIUM">Média</option>
-                            <option value="HIGH">Alta</option>
-                        </Form.Select>
                     </Form.Group>
 
                     <Form.Group className="d-flex justify-content-end gap-3">
@@ -133,11 +146,11 @@ const style = {
 
 function getInitialState(mode, task) {
     return mode === "edit" && task ? {
-        title: task.title || "",
-        description: task.description || "",
-        date: task.date || "",
-        priority: task.priority || "",
-        status: task.status || "todo",
+        title: task.taskname || "",
+        description: task.taskdescription || "",
+        date: task.createdAt || "",
+        priority: task.taskpriority || "",
+        status: task.taskstatus || "todo",
     } : {
         title: "",
         description: "",
