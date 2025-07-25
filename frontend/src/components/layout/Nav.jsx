@@ -1,28 +1,32 @@
 import styles from "./Nav.module.css";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaHome, FaTasks, FaUser } from "react-icons/fa";
 
 export default function Nav() {
     const [linkActive, setLinkActive] = useState("/");
 
+    useEffect(() => {
+        const currentPath = window.location.pathname;
+        setLinkActive(currentPath);
+    }, []);
+
     function toggleLinkStats(path) {
         setLinkActive(path);
-
     };
 
     return (
         <header>
             <nav className={styles.navbar}>
                 <div className={styles.logo}>
-                    <Link to={"/home"}>Logo</Link>
+                    <Link to={"/home"} onClick={() => toggleLinkStats("/home")}>Logo</Link>
                 </div>
                 <ul className={styles.list}>
                     <li className={styles.item}>
                         <Link
                             to={"/home"}
-                            onClick={() => toggleLinkStats("/")}
-                            className={linkActive === "/" ? styles.active : ""} >
+                            onClick={() => toggleLinkStats("/home")}
+                            className={linkActive === "/home" ? styles.active : ""} >
                             <FaHome />
                             Início
                         </Link>
