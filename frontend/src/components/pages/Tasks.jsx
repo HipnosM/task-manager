@@ -3,69 +3,61 @@ import styles from "./Tasks.module.css";
 import Button from "../layout/Button";
 import { FaEdit, FaTrash } from "react-icons/fa";
 import { FiLoader } from "react-icons/fi";
+import Toast from "react-hot-toast";
+import api from "../../api/api";
+import ModalTask from "../layout/ModalTask";
 
 export default function Tasks() {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
-    const url = import.meta.env.VITE_API_URL;
+    const [modalOpen, setModalOpen] = useState(false);
+    const [selectedTask, setSelectedTask] = useState(null);
 
     useEffect(() => {
-        const fetchTasks = async () => {
-            const token = localStorage.getItem("token");
-
-            if (!token) {
-                console.error("Usuário não autenticado. Faça login.");
-                setLoading(!loading);
-                return;
-            }
-
-            try {
-                const response = await fetch(`${url}/tasks`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${token}`
-                    },
-                });
-
-                if (!response.ok) {
-                    throw new Error("Erro ao buscar tarefas");
-                }
-
-                const data = await response.json();
-                setTasks(data);
-            } catch (error) {
-                console.error(error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         setTimeout(() => {
             fetchTasks();
         }, 300);
     }, []);
 
-    const handleDelete = async (taskId) => {
-        try {
-            const token = localStorage.getItem("token");
-            setLoading(true);
-            const response = await fetch(`${url}/tasks/${taskId}`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
-                },
-            });
-            if (!response.ok) {
-                throw new Error("Erro ao excluir tarefa");
-            }
-            const updatedTasks = tasks.filter((task) => task.id !== taskId);
-            setTasks(updatedTasks);
+    const fetchTasks = async () => {
+        const token = localStorage.getItem("token");
+        if (!token) {
             setLoading(false);
-        } catch (error) {
-            console.error(error);
+            Toast.error("Você precisa estar logado para ver suas tarefas.");
+            return;
         }
+
+        await api.getTasks()
+            .then((response) => {
+                setTasks(response);
+                console.log("Tarefas carregadas:", response);
+                setLoading(false);
+            })
+            .catch((error) => {
+                console.error("Erro ao buscar tarefas:", error);
+                setLoading(false);
+                Toast.error(`${error.message || "Erro ao buscar tarefas"}`, { icon: "❌" });
+            })
+    };
+
+    const handleEdit = (task) => {
+        setSelectedTask(task);
+        setModalOpen(true);
+    };
+
+    const handleDelete = async (taskId) => {
+        if (!window.confirm("Tem certeza que deseja excluir esta tarefa?")) return;
+
+        await api.deleteTask(taskId)
+            .then(() => {
+                // setTasks(tasks.filter(task => task.id !== taskId));
+                fetchTasks();
+                Toast.success("Tarefa excluída com sucesso!", { icon: "✅" });
+            })
+            .catch((error) => {
+                console.error("Erro ao excluir tarefa:", error);
+                Toast.error(`${error.message || "Erro ao excluir tarefa"}`, { icon: "❌" });
+            })
     };
 
     return (
@@ -79,30 +71,75 @@ export default function Tasks() {
                 </div>}
             {!loading && tasks.length > 0 && (
                 <div id={styles.tasks}>
-                    {tasks.map((task) => (
-                        <div key={task.id} className={styles.task}>
-                            <h3 id={styles.task_title}>{task.taskname}</h3>
-                            <p id={styles.task_description}>{task.taskdescription}</p>
-                            <p id={styles.task_status}>Status: <span>{task.taskstatus ? "Concluído" : "Pendente"}</span></p>
-                            <div id={styles.task_buttons}>
-                                <Button
-                                    text="Editar"
-                                    customClass="thin"
-                                    icon={<FaEdit />}
-                                    onClick={() => handleEdit(task.id)}
-                                />
-                                <Button
-                                    text="Apagar"
-                                    customClass="thin transparent trash"
-                                    icon={<FaTrash />}
-                                    type="button"
-                                    onClick={() => handleDelete(task.id)}
-                                />
-                            </div>
-                        </div>
-                    ))}
+                    {tasks
+                        .sort((a, b) => {
+                            const priorityOrder = { high: 1, medium: 2, low: 3 };
+                            return priorityOrder[a.taskpriority.toLowerCase()] - priorityOrder[b.taskpriority.toLowerCase()];
+                        })
+                        .map((task) => <TaskCard key={task.id} task={task} onDelete={handleDelete} onEdit={handleEdit} />)
+                    }
                 </div>
             )}
+            {modalOpen && <ModalTask
+                modalOpen={modalOpen}
+                task={selectedTask}
+                mode="edit"
+                onClose={() => setModalOpen(false)}
+                onSave={handleEdit}
+                fetchTasks={fetchTasks}
+            />}
         </section>
     );
+};
+
+const TaskCard = ({ task, onDelete, onEdit }) => {
+    return (
+        <div className={styles.task}>
+            <div className={styles.task__header}
+                style={{ backgroundColor: priorityColors[task.taskpriority.toLowerCase()].backgroundColor }}>
+                <span className={styles.task__priorityBadge}
+                    style={{ backgroundColor: priorityColors[task.taskpriority.toLowerCase()].color }}>
+                </span>
+                <span className={styles.task__priority}>
+                    {formatedPriority(task.taskpriority)}
+                </span>
+            </div>
+
+            <div className={styles.task__content}>
+                <h4 id={styles.task__name}>{task.taskname}</h4>
+                <p id={styles.task__description}>{task.taskdescription}</p>
+            </div>
+
+            <div id={styles.task__actions}>
+                <Button
+                    text="Apagar"
+                    customClass="thin red"
+                    icon={<FaTrash />}
+                    type="button"
+                    onClick={() => onDelete(task.id)}
+                />
+                <Button
+                    text="Editar"
+                    customClass="thin"
+                    icon={<FaEdit />}
+                    onClick={() => onEdit(task)}
+                />
+            </div>
+        </div>
+    );
+};
+
+const priorityColors = {
+    low: { color: "#28a745", backgroundColor: "#d4edda" },
+    medium: { color: "#ffc107", backgroundColor: "#fff3cd" },
+    high: { color: "#dc3545", backgroundColor: "#f8d7da" }
 }
+
+const formatedPriority = (priority) => {
+    const priorityMap = {
+        low: "Baixa prioridade",
+        medium: "Média prioridade",
+        high: "Alta prioridade"
+    };
+    return priorityMap[priority.toLowerCase()] || priority;
+};
