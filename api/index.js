@@ -11,7 +11,27 @@ import authMiddleware from "./middlewares/authMiddleware.js";
 
 
 const app = express();
-app.use(cors()); // Permite requisições do frontend
+
+const allowedOrigins = [
+  "https://task-manager-pgpm.vercel.app",
+];
+
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
+}));
+
+// garantir resposta para preflight
+app.options("*", cors());
+
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
