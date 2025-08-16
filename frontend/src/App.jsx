@@ -8,6 +8,7 @@ import Nav from "./components/layout/Nav";
 import Tasks from "./components/pages/Tasks";
 import Account from "./components/pages/Account";
 import Login from "./components/pages/Login";
+import { UserProvider } from "./components/context/userContext";
 
 const NavigationWraper = () => {
   const location = useLocation();
@@ -17,20 +18,22 @@ const NavigationWraper = () => {
 function App() {
 
   return (
-    <Router>
-      <NavigationWraper />
+    <UserProvider>
+      <Router>
+        <NavigationWraper />
 
-      <Container customClass="min_heiht">
-        <Toaster position="top-right" reverseOrder={false} />
+        <Container customClass="min_heiht">
+          <Toaster position="top-right" reverseOrder={false} />
 
-        <Routes>
-          <Route exact path="/" element={<Login />} />
-          <Route exact path="/home" element={<Home />} />
-          <Route path="/tasks" element={<Tasks />} />
-          <Route path="/my-account" element={<Account />} />
-        </Routes>
-      </Container>
-    </Router>
+          <Routes>
+            <Route exact path="/" element={<Login />} />
+            <Route exact path="/home" element={<Home />} />
+            <Route path="/tasks" element={<Tasks />} />
+            <Route path="/my-account" element={<Account />} />
+          </Routes>
+        </Container>
+      </Router>
+    </UserProvider>
   );
 };
 
