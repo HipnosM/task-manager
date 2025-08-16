@@ -83,4 +83,18 @@
             color: #ff0000;
         }
     }
+
+    &.transparent_red {
+        color: #ff0000;
+        background-color: transparent;
+
+        & .icon {
+            color: #ff0000;
+        }
+
+        &:hover {
+            background-color: rgba(0, 0, 0, .1);
+            transition: all .3s linear;
+        }
+    }
 }
