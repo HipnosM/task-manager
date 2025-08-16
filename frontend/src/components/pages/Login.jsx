@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { replace, useNavigate } from "react-router-dom"; // Redirecionamento após login
 import styles from "./Login.module.css";
 import Button from "../layout/Button";
 import { FaSignInAlt, FaUserCheck } from "react-icons/fa";
+
+import { UserContext } from "../context/userContext";
 
 import Hero from "../../assets/hero_login.png";
 import api from "../../api/api";
@@ -22,6 +24,7 @@ export default function Login() {
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    const { login } = useContext(UserContext);
     const navigate = useNavigate(); // Hook para redirecionar após login
 
     useEffect(() => {
@@ -56,7 +59,7 @@ export default function Login() {
         }
 
         setIsSubmitting(true);
-        
+
         api.register({
             name: userData.userName,
             email: userData.userEmail,
@@ -77,7 +80,7 @@ export default function Login() {
         event.preventDefault();
         setIsSubmitting(true);
 
-        await api.login({
+        await login({
             userOrEmail: loginData.userOrEmail,
             password: loginData.userPass
         })
