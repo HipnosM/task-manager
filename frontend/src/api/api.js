@@ -32,6 +32,26 @@ const api = {
             throw new Error(message);
         }
     },
+    getCurrentUser: async () => {
+        try {
+            const response = await instance.get("/auth/me", { headers: authHeader() });
+            return response.data;
+        } catch (error) {
+            const message = error.response?.data?.error || "Erro ao carregar o usuário."
+            console.error("Erro ao carregar o usuário;", message);
+            throw new Error(message);
+        }
+    },
+    updateUser: async () => {
+        try {
+            const response = await instance.put("/auth/me-update", { headers: authHeader });
+            return response.data;
+        } catch (error) {
+            const message = error.response?.data?.error || "Erro ao atualizar usuário.";
+            console.error("Erro ao atualizar usuário:", message);
+            throw new Error(message);
+        }
+    },
     logout: () => {
         localStorage.removeItem("token");
     },

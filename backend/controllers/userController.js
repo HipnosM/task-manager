@@ -73,6 +73,77 @@ const userLogin = async (req, res) => {
     };
 };
 
+const getAuthenticatedUser = async (req, res) => {
+    try {
+        const user = await prisma.user.findUnique({
+            where: { id: req.user.userId },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                Task: {
+                    select: {
+                        id: true,
+                        taskname: true,
+                        taskdescription: true,
+                        taskpriority: true,
+                        taskstatus: true,
+                        createdAt: true
+                    }
+                }
+            }
+        });
+        if (!user) return res.status(400).json({ message: "Usuário não encontrado." });
 
+        res.json(user);
+    } catch (error) {
+        console.error("Erro ao carregar usuário:", error);
+        res.status(500).json({ message: "Erro ao carregar usuário." })
+    }
+};
 
-export { userRegister, userLogin };
+const updateUser = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        const { name, email } = req.body;
+
+        if (!name && !email) {
+            return res.status(400).json({ error: "Informe pelo menos um campo para atualizar." });
+        }
+
+        const otherUserExists = await prisma.user.findFirst({
+            where: {
+                NOT: { id: userId },
+                OR: [
+                    { email: email || undefined },
+                    { name: name || undefined }
+                ]
+            }
+        });
+
+        if (otherUserExists) {
+            if (otherUserExists.email === email) {
+                return res.status(400).json({ error: "E-mail já está em uso." });
+            }
+            if (otherUserExists.name === name) {
+                return res.status(400).json({ error: "Nome já está em uso." });
+            }
+        }
+
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: {
+                ...(name && { name }),
+                ...(email && { email }),
+            },
+            select: { id: true, name: true, email: true }
+        });
+
+        return res.json(updatedUser);
+    } catch (error) {
+        console.error("Erro ao atualizar o usuário.", error);
+        return res.status(500).json({ error: "Erro interno ao atualizar usuário." });
+    }
+}
+
+export { userRegister, userLogin, getAuthenticatedUser, updateUser };
