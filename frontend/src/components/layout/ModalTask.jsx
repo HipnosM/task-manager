@@ -16,7 +16,7 @@ export default function ModalTask({ modalOpen = false, onClose, mode = "create",
         }
     }, [modalOpen, mode, task]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         e.stopPropagation();
         setIsSubmitting(true);
@@ -31,7 +31,7 @@ export default function ModalTask({ modalOpen = false, onClose, mode = "create",
         const taskData = { title, description, priority };
 
         if (mode === "create") {
-            api.createTask(taskData)
+            await api.createTask(taskData)
                 .then(() => {
                     Toast.success("Tarefa criada com sucesso!", { icon: "✅" });
                 })
@@ -41,7 +41,7 @@ export default function ModalTask({ modalOpen = false, onClose, mode = "create",
         }
 
         if (mode === "edit" && task) {
-            api.updateTask(task.id, taskData)
+            await api.updateTask(task.id, taskData)
                 .then(() => {
                     Toast.success("Tarefa atualizada com sucesso!", { icon: "✅" });
                     fetchTasks();
