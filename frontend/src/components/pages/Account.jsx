@@ -25,6 +25,9 @@ export default function Account() {
                 userEmail: user.email,
                 userTasks: user.Task || []
             })
+        } else {
+            logout();
+            navigate("/");
         }
         setIsSubmitting(false);
         setIsEditing(false);
