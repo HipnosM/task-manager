@@ -19,7 +19,7 @@ export default function Nav() {
         <header>
             <nav className={styles.navbar}>
                 <div className={styles.logo}>
-                    <Link to={"/home"} onClick={() => toggleLinkStats("/home")}>Logo</Link>
+                    <Link to={"/home"} onClick={() => toggleLinkStats("/home")}>Task Manager</Link>
                 </div>
                 <ul className={styles.list}>
                     <li className={styles.item}>
