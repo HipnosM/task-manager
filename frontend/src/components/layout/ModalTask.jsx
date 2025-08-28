@@ -21,14 +21,14 @@ export default function ModalTask({ modalOpen = false, onClose, mode = "create",
         e.stopPropagation();
         setIsSubmitting(true);
 
-        const { title, description, priority } = formData;
+        const { title, description, priority, status } = formData;
         if (!title || !description || !priority) {
             Toast.error("Preencha todos os campos obrigatórios!");
             setIsSubmitting(false);
             return;
         }
 
-        const taskData = { title, description, priority };
+        const taskData = { title, description, priority, status };
 
         if (mode === "create") {
             await api.createTask(taskData)
@@ -100,6 +100,20 @@ export default function ModalTask({ modalOpen = false, onClose, mode = "create",
                                 <option value="HIGH">Alta</option>
                             </Form.Select>
                         </Form.Group>
+
+
+                        <Form.Group>
+                            <Form.Label style={style.label}>Status</Form.Label>
+                            <Form.Select
+                                id="status" style={style.input}
+                                value={formData.status}
+                                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                                disabled={isSubmitting}
+                            >
+                                <option value="false">Pendente</option>
+                                <option value="true">Concluída</option>
+                            </Form.Select>
+                        </Form.Group>
                     </Form.Group>
 
                     <Form.Group className="mb-3">
@@ -150,11 +164,11 @@ function getInitialState(mode, task) {
         description: task.taskdescription || "",
         date: task.createdAt || "",
         priority: task.taskpriority || "",
-        status: task.taskstatus || "todo",
+        status: task.taskstatus || "false",
     } : {
         title: "",
         description: "",
         priority: "",
-        status: "todo",
+        status: "false",
     };
 };
