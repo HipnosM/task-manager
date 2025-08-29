@@ -95,14 +95,20 @@ export default function Tasks() {
 const TaskCard = ({ task, onDelete, onEdit }) => {
     return (
         <div className={styles.task}>
-            <div className={styles.task__header}
-                style={{ backgroundColor: priorityColors[task.taskpriority.toLowerCase()].backgroundColor }}>
-                <span className={styles.task__priorityBadge}
-                    style={{ backgroundColor: priorityColors[task.taskpriority.toLowerCase()].color }}>
-                </span>
-                <span className={styles.task__priority}>
-                    {formatedPriority(task.taskpriority)}
-                </span>
+            <div className={styles.task__header}>
+                <div className={styles.task__priorityBadgeBox} style={{ backgroundColor: priorityColors[task.taskpriority.toLowerCase()].backgroundColor }}>
+                    <span className={styles.task__priorityBadge}
+                        style={{ backgroundColor: priorityColors[task.taskpriority.toLowerCase()].color }}></span>
+                    <span className={styles.task__priority}>
+                        {formatedPriority(task.taskpriority)}
+                    </span>
+                </div>
+
+                <div className={styles.task__statusBox} style={{ backgroundColor: statusColors[task.taskstatus ? "complete" : "pending"].backgroundColor }}>
+                    <span className={styles.task__status}
+                        style={{ color: statusColors[task.taskstatus ? "complete" : "pending"].color}}
+                    >{formatedStatus(task.taskstatus)}</span>
+                </div>
             </div>
 
             <div className={styles.task__content}>
@@ -135,6 +141,11 @@ const priorityColors = {
     high: { color: "#dc3545", backgroundColor: "#f8d7da" }
 }
 
+const statusColors = {
+    pending: { color: "#6b7280", backgroundColor: "#f3f4f6" },
+    complete: { color: "#059669", backgroundColor: "#d1fae5" }
+}
+
 const formatedPriority = (priority) => {
     const priorityMap = {
         low: "Baixa prioridade",
@@ -142,4 +153,12 @@ const formatedPriority = (priority) => {
         high: "Alta prioridade"
     };
     return priorityMap[priority.toLowerCase()] || priority;
+};
+
+const formatedStatus = (status) => {
+    const statusMap = {
+        false: "Pendente",
+        true: "Concluída"
+    };
+    return statusMap[status] ?? status;
 };

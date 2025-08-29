@@ -44,7 +44,7 @@
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr));
         gap: 1.25rem;
-        align-items: start; 
+        align-items: start;
 
         & .task {
             width: 100%;
@@ -58,11 +58,11 @@
             overflow: hidden;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             transition: box-shadow 0.2s ease;
-            
+
             &:hover {
                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
             }
-            
+
             & .task__header {
                 display: flex;
                 align-items: center;
@@ -70,20 +70,34 @@
                 padding: .3rem .5rem;
                 flex-shrink: 0;
 
-                & .task__priorityBadge {
-                    width: 0.75rem;
-                    height: 0.75rem;
-                    border-radius: 50%;
-                    background-color: #ccc;
-                    flex-shrink: 0;
-                    display: inline-block;
+                & .task__priorityBadgeBox,
+                .task__statusBox {
+                    border-radius: 0.75rem;
+                    padding: .15rem .75rem;
+                    display: flex;
+                    align-items: center;
+                    gap: .25rem;
+
+                    & .task__priorityBadge {
+                        width: 0.75rem;
+                        height: 0.75rem;
+                        border-radius: 50%;
+                        background-color: #ccc;
+                        flex-shrink: 0;
+                        display: inline-block;
+                    }
+
+                    & .task__priority {
+                        font-size: .75rem;
+                        font-weight: 500;
+                        color: #555;
+                    }
+
+                    & .task__status {
+                        font-size: .75rem;
+                    }
                 }
 
-                & .task__priority {
-                    font-size: .75rem;
-                    font-weight: 500;
-                    color: #555;
-                }
             }
 
             & .task__content {
@@ -125,7 +139,7 @@
         & #tasks {
             grid-template-columns: 1fr;
             gap: 0.75rem;
-            
+
             & .task {
                 width: 100%;
                 max-width: none;
