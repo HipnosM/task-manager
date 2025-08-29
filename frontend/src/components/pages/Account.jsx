@@ -8,7 +8,7 @@ import { UserContext } from "../context/userContext";
 import toast from "react-hot-toast";
 
 export default function Account() {
-    const { user, logout } = useContext(UserContext);
+    const { user, logout, isLoading } = useContext(UserContext);
     const navigate = useNavigate();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -19,15 +19,20 @@ export default function Account() {
     });
 
     useEffect(() => {
+        const token = localStorage.getItem("token");
+        if (!isLoading && (!token || !user)) {
+            toast.error("Sessão expirada, faça login novamente.");
+            navigate("/login");
+        }
+    }, [user, isLoading, navigate]);
+
+    useEffect(() => {
         if (user) {
             setUserData({
                 userName: user.name,
                 userEmail: user.email,
                 userTasks: user.Task || []
             })
-        } else {
-            logout();
-            navigate("/");
         }
         setIsSubmitting(false);
         setIsEditing(false);
