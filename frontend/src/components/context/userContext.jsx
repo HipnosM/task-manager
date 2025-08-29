@@ -30,6 +30,15 @@ export const UserProvider = ({ children }) => {
         loadUser();
     }, []);
 
+    const refreshUser = async () => {
+        try {
+            const userData = await api.getCurrentUser();
+            setUser(userData);
+        } catch (error) {
+            throw error;
+        }
+    };
+
     const login = async (credentials) => {
         try {
             await api.login(credentials);
@@ -49,6 +58,7 @@ export const UserProvider = ({ children }) => {
         <UserContext.Provider value={{
             user,
             setUser,
+            refreshUser,
             isLoading,
             login,
             logout
