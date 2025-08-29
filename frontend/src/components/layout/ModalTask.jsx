@@ -4,10 +4,13 @@ import Form from 'react-bootstrap/Form';
 import Button from './Button';
 import Toast from 'react-hot-toast';
 import api from '../../api/api';
+import { UserContext } from '../context/userContext';
+import { useContext } from 'react';
 
 export default function ModalTask({ modalOpen = false, onClose, mode = "create", task = null, fetchTasks }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formData, setFormData] = useState(getInitialState(mode, task));
+    const { refreshUser } = useContext(UserContext);
 
     useEffect(() => {
         if (modalOpen) {
@@ -45,6 +48,7 @@ export default function ModalTask({ modalOpen = false, onClose, mode = "create",
                 .then(() => {
                     Toast.success("Tarefa atualizada com sucesso!", { icon: "✅" });
                     fetchTasks();
+                    refreshUser();
                 })
                 .catch((error) => {
                     Toast.error(error.message, { icon: "❌" });
@@ -102,7 +106,7 @@ export default function ModalTask({ modalOpen = false, onClose, mode = "create",
                         </Form.Group>
 
 
-                        <Form.Group>
+                        <Form.Group className="mb-3 w-100">
                             <Form.Label style={style.label}>Status</Form.Label>
                             <Form.Select
                                 id="status" style={style.input}
@@ -164,7 +168,7 @@ function getInitialState(mode, task) {
         description: task.taskdescription || "",
         date: task.createdAt || "",
         priority: task.taskpriority || "",
-        status: task.taskstatus || "false",
+        status: String(task.taskstatus),
     } : {
         title: "",
         description: "",
