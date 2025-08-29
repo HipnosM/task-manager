@@ -6,12 +6,14 @@ import { FiLoader } from "react-icons/fi";
 import Toast from "react-hot-toast";
 import api from "../../api/api";
 import ModalTask from "../layout/ModalTask";
+import { useNavigate } from "react-router-dom";
 
 export default function Tasks() {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [modalOpen, setModalOpen] = useState(false);
     const [selectedTask, setSelectedTask] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         setTimeout(() => {
@@ -24,6 +26,7 @@ export default function Tasks() {
         if (!token) {
             setLoading(false);
             Toast.error("Você precisa estar logado para ver suas tarefas.");
+            navigate("/");
             return;
         }
 
